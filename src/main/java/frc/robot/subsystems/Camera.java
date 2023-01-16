@@ -57,7 +57,7 @@ public class Camera extends SubsystemBase {
         return null;
     }
   }
-
+  
 
   @Override
   public void periodic() {

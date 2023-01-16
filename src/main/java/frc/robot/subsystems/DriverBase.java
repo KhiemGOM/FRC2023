@@ -6,17 +6,29 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+//import com.pathplanner.lib.PathConstraints;
+//import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
+import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import com.pathplanner.lib.commands.PPMecanumControllerCommand;
 import static frc.robot.Constants.MotorIDs.*;
 import static frc.robot.Constants.Measurements.*;
 import static frc.robot.Constants.SingleInstance.*;
 
 public class DriverBase extends SubsystemBase {
+  
+  //private PathPlannerTrajectory traj = PathPlanner.loadPath("Example Path", new PathConstraints(4, 3));
   private WPI_TalonSRX leftFrontMotor = new WPI_TalonSRX(LEFT_FRONT_MOTOR);
   private WPI_TalonSRX leftBackMotor = new WPI_TalonSRX(LEFT_BACK_MOTOR);
   private WPI_TalonSRX rightFrontMotor = new WPI_TalonSRX(RIGHT_FRONT_MOTOR);
@@ -42,14 +54,58 @@ public class DriverBase extends SubsystemBase {
   {
     mecanum.driveCartesian(x, y, rotation);
   }
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-    odometry.update(GYRO.getRotation2d(), new MecanumDriveWheelPositions(
+
+  public void drive (MecanumDriveWheelSpeeds vel)
+  {
+    leftFrontMotor.set(vel.frontLeftMetersPerSecond);
+    leftBackMotor.set(vel.rearLeftMetersPerSecond);
+    rightFrontMotor.set(vel.frontRightMetersPerSecond);
+    rightBackMotor.set(vel.rearRightMetersPerSecond);
+  }
+
+  public Command getPathFollowCommand (PathPlannerTrajectory _traj, boolean isFirstPath)
+  {
+    return new SequentialCommandGroup(
+        new InstantCommand(() -> {
+          // Reset odometry for the first path you run during auto
+          if(isFirstPath){
+              this.resetOdometry(_traj.getInitialHolonomicPose());
+          }
+        }),
+        new PPMecanumControllerCommand(
+            _traj, 
+            this::getPose, // Pose supplier
+            this.kinematics, // MecanumDriveKinematics
+            new PIDController(0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+            new PIDController(0, 0, 0), // Y controller (usually the same values as X controller)
+            new PIDController(0, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+            3.0, // Max wheel velocity meters per second
+            this::drive, // MecanumDriveWheelSpeeds consumer
+            true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+            this // Requires this drive subsystem
+        )
+    );
+  }
+  public Pose2d getPose()
+  {
+    return odometry.getPoseMeters();
+  }
+  public void resetOdometry(Pose2d _initialPose)
+  {
+    odometry.resetPosition(GYRO.getRotation2d(), getWheelPositions(),_initialPose);
+  }
+  private MecanumDriveWheelPositions getWheelPositions() {
+    return new MecanumDriveWheelPositions(
       leftFrontMotor.getSelectedSensorPosition() * WHEEL_DIAMETER * Math.PI / 4096,
       rightFrontMotor.getSelectedSensorPosition() * WHEEL_DIAMETER * Math.PI / 4096,
       leftBackMotor.getSelectedSensorPosition() * WHEEL_DIAMETER * Math.PI / 4096, 
       rightBackMotor.getSelectedSensorPosition() * WHEEL_DIAMETER * Math.PI / 4096
-    ));
+    );
   }
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+    odometry.update(GYRO.getRotation2d(), getWheelPositions());
+  }
+  
 }
