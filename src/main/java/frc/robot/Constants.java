@@ -7,7 +7,11 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Joystick;
+import frc.robot.subsystems.Camera;
+import frc.robot.subsystems.DriverBase;
 import frc.robot.subsystems.Gyro;
+import frc.robot.subsystems.Pneumatic;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -23,6 +27,13 @@ public final class Constants {
     public static final int LEFT_BACK_MOTOR = 2;
     public static final int RIGHT_FRONT_MOTOR = 3;
     public static final int RIGHT_BACK_MOTOR = 4;
+  }
+  public final class ButtonIDs
+  {
+    public static final int RIGHT_JOYSTICK_X_ID = 1;
+    public static final int RIGHT_JOYSTICK_Y_ID = 5;
+    public static final int LEFT_JOYSTICK_X_ID = 0;
+    public static final int LEFT_JOYSTICK_Y_ID = 4;
   }
   public final static class Measurements
   {
@@ -41,5 +52,10 @@ public final class Constants {
   public final static class SingleInstance
   {
     public static final Gyro GYRO = new Gyro();
+    public static final Pneumatic PNEUMATIC = new Pneumatic();
+    public static final DriverBase DRIVER_BASE = new DriverBase();
+    public static final Camera CAMERA = new Camera();
+
+    public static final Joystick JOYSTICK = new Joystick(0);
   }
 }
