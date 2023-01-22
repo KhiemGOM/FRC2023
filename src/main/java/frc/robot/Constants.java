@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.subsystems.Gyro;
 
@@ -29,6 +31,11 @@ public final class Constants {
     public static final Translation2d CENTRE_TO_RIGHT_FRONT = new Translation2d(1, 1);
     public static final Translation2d CENTRE_TO_RIGHT_BACK = new Translation2d(1, 1);
     public static final double WHEEL_DIAMETER = 1.5;
+  }
+
+  public final static class GridPoses
+  {
+    public static final Pose2d LEFTGRID = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
   }
 
   public final static class SingleInstance

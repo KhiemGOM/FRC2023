@@ -29,11 +29,11 @@ public class Camera extends SubsystemBase {
   public Camera() {
     try {
       aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(aprilTagFieldAbsPath);
-    } 
+    }
     catch (IOException e) {}
     var camList = new ArrayList<Pair<PhotonCamera, Transform3d>>();
     camList.add(new Pair<PhotonCamera, Transform3d>(camera, robotToCam));
-    robotPoseEstimator = new RobotPoseEstimator(aprilTagFieldLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, camList);
+    robotPoseEstimator = new RobotPoseEstimator(aprilTagFieldLayout, PoseStrategy.AVERAGE_BEST_TARGETS, camList);
   }
   //Move robot arm to april tag
   public double getVerticalAngleToAprilTag() { //Up is positive
@@ -45,9 +45,15 @@ public class Camera extends SubsystemBase {
     return camera.getLatestResult().getBestTarget().getYaw();
   }
 
-  public Pose2d getEstimatedPose (Pose2d prevEstimatedRobotPose) 
+  public int getAprilTagID()
+  {
+    return camera.getLatestResult().getBestTarget().getFiducialId();
+  }
+
+  public Pose2d getEstimatedPose () 
   {
     var result = robotPoseEstimator.update();
+
     if (result.isPresent()) 
     {
         return result.get().getFirst().toPose2d();
