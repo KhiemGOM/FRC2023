@@ -16,7 +16,7 @@ public class Gyro extends SubsystemBase {
   {
     return gyro.getAngle();
   }
-
+  /** Angle is continuous */
   public Rotation2d getRotation2d()
   {
     return gyro.getRotation2d();

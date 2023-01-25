@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import org.photonvision.PhotonCamera;
 import org.photonvision.RobotPoseEstimator;
 import org.photonvision.RobotPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Pair;
@@ -30,24 +31,36 @@ public class Camera extends SubsystemBase {
     try {
       aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(aprilTagFieldAbsPath);
     }
-    catch (IOException e) {}
+    catch (IOException e) {};
     var camList = new ArrayList<Pair<PhotonCamera, Transform3d>>();
     camList.add(new Pair<PhotonCamera, Transform3d>(camera, robotToCam));
     robotPoseEstimator = new RobotPoseEstimator(aprilTagFieldLayout, PoseStrategy.AVERAGE_BEST_TARGETS, camList);
   }
   //Move robot arm to april tag
-  public double getVerticalAngleToAprilTag() { //Up is positive
-    return camera.getLatestResult().getBestTarget().getPitch();
+  public double getVerticalAngleToAprilTag(int ID) { //Up is positive
+    var list = camera.getLatestResult().getTargets();
+    for (var target : list) {
+      if (target.getFiducialId() == ID) {
+        return target.getPitch();
+      }
+    }
+    return 361f;
   }
 
   //Move driver base facing april tag
-  public double getHorizontalAngleToAprilTag() { //To the right is positive
-    return camera.getLatestResult().getBestTarget().getYaw();
+  public double getHorizontalAngleToAprilTag(int ID) { //To the right is positive
+    var list = camera.getLatestResult().getTargets();
+    for (var target : list) {
+      if (target.getFiducialId() == ID) {
+        return target.getYaw();
+      }
+    }
+    return 361f;
   }
 
-  public int getAprilTagID()
+  public PhotonTrackedTarget getBestTarget()
   {
-    return camera.getLatestResult().getBestTarget().getFiducialId();
+    return camera.getLatestResult().getBestTarget();
   }
 
   public Pose2d getEstimatedPose () 
