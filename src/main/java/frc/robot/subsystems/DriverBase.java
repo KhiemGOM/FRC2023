@@ -71,7 +71,7 @@ public class DriverBase extends SubsystemBase {
           if(isFirstPath){
               this.resetOdometry(_traj.getInitialHolonomicPose());
           }
-        }),
+        },DRIVER_BASE),
         new PPMecanumControllerCommand(
             _traj, 
             this::getPose, // Pose supplier
@@ -92,8 +92,18 @@ public class DriverBase extends SubsystemBase {
   }
   public void resetOdometry(Pose2d _initialPose)
   {
-    odometry.resetPosition(GYRO.getRotation2d(), getWheelPositions(),_initialPose);
+    resetEncoders();
+    odometry.resetPosition(GYRO.getRotation2d(), getWheelPositions(), _initialPose);
   }
+
+  public void resetEncoders()
+  {
+    leftFrontMotor.setSelectedSensorPosition(0);
+    leftBackMotor.setSelectedSensorPosition(0);
+    rightFrontMotor.setSelectedSensorPosition(0);
+    rightBackMotor.setSelectedSensorPosition(0);
+  }
+
   private MecanumDriveWheelPositions getWheelPositions() {
     return new MecanumDriveWheelPositions(
       leftFrontMotor.getSelectedSensorPosition() * WHEEL_DIAMETER * Math.PI / 4096,

@@ -13,26 +13,27 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
 
-import static frc.robot.Constants.GridPoses.*;
+//import static frc.robot.Constants.GridPoses.*;
 
-public class DriveToAprilTag extends CommandBase {
+public class DriveToTargetPose extends CommandBase {
   private PathPlannerTrajectory trajectory; 
   private DriverBase m_subsystem;
+  private Pose2d targetPose;
 
-  public DriveToAprilTag(DriverBase __subsystem) {
+  public DriveToTargetPose(DriverBase __subsystem, Pose2d __targetPose) {
     m_subsystem = __subsystem;
+    targetPose = __targetPose;
     addRequirements(m_subsystem);
   }
 
   @Override
   public void initialize() {
     Pose2d initPose = m_subsystem.getPose();
-    Pose2d targetPose = LEFTGRID;
     trajectory =  PathPlanner.generatePath(
       new PathConstraints(4, 3),
       new PathPoint(initPose.getTranslation(),initPose.getRotation()),
       new PathPoint(targetPose.getTranslation(),targetPose.getRotation()));
-      m_subsystem.getPathFollowCommand(trajectory, true).schedule();
+      m_subsystem.getPathFollowCommand(trajectory, false).schedule();
   }
 
   // Called every time the scheduler runs while the command is scheduled.

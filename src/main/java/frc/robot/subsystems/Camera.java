@@ -5,15 +5,12 @@
 package frc.robot.subsystems;
 
 import java.io.IOException;
-import java.util.ArrayList;
-
 import org.photonvision.PhotonCamera;
-import org.photonvision.RobotPoseEstimator;
-import org.photonvision.RobotPoseEstimator.PoseStrategy;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonTrackedTarget;
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.Pair;
+import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -24,7 +21,7 @@ public class Camera extends SubsystemBase {
   /** Creates a new Camera. */
   private PhotonCamera camera = new PhotonCamera("photonvision");
   private final String aprilTagFieldAbsPath = "/home/lvuser/deploy/fields/2023_FieldLayout.json";
-  private RobotPoseEstimator robotPoseEstimator;
+  private PhotonPoseEstimator robotPoseEstimator;
   private Transform3d robotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0));
   private AprilTagFieldLayout aprilTagFieldLayout = null;
   public Camera() {
@@ -32,9 +29,8 @@ public class Camera extends SubsystemBase {
       aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(aprilTagFieldAbsPath);
     }
     catch (IOException e) {};
-    var camList = new ArrayList<Pair<PhotonCamera, Transform3d>>();
-    camList.add(new Pair<PhotonCamera, Transform3d>(camera, robotToCam));
-    robotPoseEstimator = new RobotPoseEstimator(aprilTagFieldLayout, PoseStrategy.AVERAGE_BEST_TARGETS, camList);
+    aprilTagFieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+    robotPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.AVERAGE_BEST_TARGETS, camera, robotToCam);
   }
   //Move robot arm to april tag
   public double getVerticalAngleToAprilTag(int ID) { //Up is positive
@@ -49,7 +45,7 @@ public class Camera extends SubsystemBase {
 
   //Move driver base facing april tag
   public double getHorizontalAngleToAprilTag(int ID) { //To the right is positive
-    var list = camera.getLatestResult().getTargets();
+    var list = camera.getLatestResult().getTargets();     
     for (var target : list) {
       if (target.getFiducialId() == ID) {
         return target.getYaw();
@@ -66,10 +62,9 @@ public class Camera extends SubsystemBase {
   public Pose2d getEstimatedPose () 
   {
     var result = robotPoseEstimator.update();
-
     if (result.isPresent()) 
     {
-        return result.get().getFirst().toPose2d();
+        return result.get().estimatedPose.toPose2d();
     } 
     else 
     {

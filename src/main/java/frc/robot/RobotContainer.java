@@ -5,7 +5,10 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+
 import static frc.robot.Constants.SingleInstance.*;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -14,6 +17,9 @@ import static frc.robot.Constants.SingleInstance.*;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  private InstantCommand m_resetOdometryToAprilTag = new InstantCommand(() -> {
+    DRIVER_BASE.resetOdometry(CAMERA.getEstimatedPose());
+  },DRIVER_BASE, CAMERA);
   public RobotContainer() {
     configureBindings();
   }
