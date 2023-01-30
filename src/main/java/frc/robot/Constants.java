@@ -34,6 +34,8 @@ public final class Constants {
     public static final int RIGHT_JOYSTICK_Y_ID = 5;
     public static final int LEFT_JOYSTICK_X_ID = 0;
     public static final int LEFT_JOYSTICK_Y_ID = 4;
+    public static final int PNEUMATIC_PUSH = 1;
+    public static final int PNEUMATIC_PULL = 2;
   }
   public final static class Measurements
   {
