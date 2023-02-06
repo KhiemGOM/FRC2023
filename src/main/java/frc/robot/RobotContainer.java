@@ -7,7 +7,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-
 import static frc.robot.Constants.SingleInstance.*;
 import static frc.robot.Constants.ButtonIDs.*;
 
@@ -19,9 +18,10 @@ import static frc.robot.Constants.ButtonIDs.*;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  private InstantCommand m_resetOdometryToAprilTag = new InstantCommand(() -> {
-    DRIVER_BASE.resetOdometry(CAMERA.getEstimatedPose());
-  },DRIVER_BASE, CAMERA);
+  //private InstantCommand m_resetOdometryToAprilTag = new InstantCommand(() -> {
+  //  DRIVER_BASE.resetOdometry(CAMERA.getEstimatedPose());
+  //},DRIVER_BASE, CAMERA);
+  
   private InstantCommand m_pneumaticPush = new InstantCommand(() -> {
     PNEUMATIC.push();
   }, PNEUMATIC);

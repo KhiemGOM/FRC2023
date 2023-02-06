@@ -8,9 +8,9 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Joystick;
-import frc.robot.subsystems.Camera;
+//import frc.robot.subsystems.Camera;
 import frc.robot.subsystems.DriverBase;
-import frc.robot.subsystems.Gyro;
+import frc.robot.subsystems.NavX;
 import frc.robot.subsystems.Pneumatic;
 
 /**
@@ -22,6 +22,7 @@ import frc.robot.subsystems.Pneumatic;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final double SENSITIVITY = 0.05;
   public final class MotorIDs {
     public static final int LEFT_FRONT_MOTOR = 1;
     public static final int LEFT_BACK_MOTOR = 2;
@@ -30,10 +31,10 @@ public final class Constants {
   }
   public final class ButtonIDs
   {
-    public static final int RIGHT_JOYSTICK_X_ID = 1;
+    public static final int RIGHT_JOYSTICK_X_ID = 2;
     public static final int RIGHT_JOYSTICK_Y_ID = 5;
     public static final int LEFT_JOYSTICK_X_ID = 0;
-    public static final int LEFT_JOYSTICK_Y_ID = 4;
+    public static final int LEFT_JOYSTICK_Y_ID = 1;
     public static final int PNEUMATIC_PUSH = 1;
     public static final int PNEUMATIC_PULL = 2;
   }
@@ -46,6 +47,14 @@ public final class Constants {
     public static final double WHEEL_DIAMETER = 1.5;
   }
 
+  public final static class PID{
+    public static final double rP = 0.1;
+    public static final double rI = 0.1;
+    public static final double rD = 0.1;
+    public static final double rMaxSpeed = 3;
+    public static final double rMaxAccel = 2;
+  }
+
   public final static class GridPoses
   {
     public static final Pose2d LEFTGRID = new Pose2d(0, 0, Rotation2d.fromDegrees(0));
@@ -53,10 +62,10 @@ public final class Constants {
 
   public final static class SingleInstance
   {
-    public static final Gyro GYRO = new Gyro();
+    public static final NavX GYRO = new NavX();
     public static final Pneumatic PNEUMATIC = new Pneumatic();
     public static final DriverBase DRIVER_BASE = new DriverBase();
-    public static final Camera CAMERA = new Camera();
+    //public static final Camera CAMERA = new Camera();
 
     public static final Joystick JOYSTICK = new Joystick(0);
   }

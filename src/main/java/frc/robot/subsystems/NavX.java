@@ -9,12 +9,12 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Gyro extends SubsystemBase {
+public class NavX extends SubsystemBase {
   private AHRS gyro = new AHRS();
-  public Gyro() {}
+  public NavX() {}
   public double getAngle()
   {
-    return gyro.getAngle();
+    return gyro.getYaw();
   }
 
   /** Angle is continuous */

@@ -11,11 +11,14 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -25,6 +28,7 @@ import com.pathplanner.lib.commands.PPMecanumControllerCommand;
 import static frc.robot.Constants.MotorIDs.*;
 import static frc.robot.Constants.Measurements.*;
 import static frc.robot.Constants.SingleInstance.*;
+import static frc.robot.Constants.PID.*;
 
 public class DriverBase extends SubsystemBase {
   
@@ -33,7 +37,7 @@ public class DriverBase extends SubsystemBase {
   private WPI_TalonSRX leftBackMotor = new WPI_TalonSRX(LEFT_BACK_MOTOR);
   private WPI_TalonSRX rightFrontMotor = new WPI_TalonSRX(RIGHT_FRONT_MOTOR);
   private WPI_TalonSRX rightBackMotor = new WPI_TalonSRX(RIGHT_BACK_MOTOR);
-  private MecanumDrive mecanum = new MecanumDrive(leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor);
+  private MecanumDrive mecanum ;
   
   private MecanumDriveWheelPositions wheelPositions = new MecanumDriveWheelPositions();
   private MecanumDriveKinematics kinematics = new MecanumDriveKinematics(
@@ -43,15 +47,47 @@ public class DriverBase extends SubsystemBase {
   CENTRE_TO_RIGHT_BACK);
 
   private MecanumDriveOdometry odometry = new MecanumDriveOdometry(kinematics, GYRO.getRotation2d(), wheelPositions);
+  private ProfiledPIDController m_PIDController = new ProfiledPIDController(rP,rI,rD, new TrapezoidProfile.Constraints(rMaxSpeed, rMaxAccel));
 
   public DriverBase() {
     leftFrontMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     leftBackMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     rightFrontMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     rightBackMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+
+    //Disable safety
+    leftFrontMotor.setSafetyEnabled(false);
+    rightFrontMotor.setSafetyEnabled(false);
+    leftBackMotor.setSafetyEnabled(false);
+    rightBackMotor.setSafetyEnabled(false);
+
+    mecanum = new MecanumDrive(leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor);
+    mecanum.setSafetyEnabled(false);
+
+    m_PIDController.enableContinuousInput(-180, 180);
   }
+
+  public void driveWithField (double x, double y, double rotation, Rotation2d gyroAngle)
+  {
+    mecanum.driveCartesian(x, y, rotation, gyroAngle);
+  }
+
+  public ProfiledPIDController getRotatePIDController ()
+  {
+    return m_PIDController;
+  }
+  public void setGoal(double goal)
+  {
+    m_PIDController.setGoal(goal);
+  }
+  public double calculate (double currentAngle)
+  {
+    return m_PIDController.calculate(currentAngle);
+  }
+
   public void drive (double x, double y, double rotation)
   {
+    System.out.println("Drive() Ran");
     mecanum.driveCartesian(x, y, rotation);
   }
 
