@@ -27,22 +27,24 @@ public class ManualControl extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    GYRO.reset();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     System.out.println("Manual Control Ran");
-    double verticleSpeed = -JOYSTICK.getRawAxis(RIGHT_JOYSTICK_Y_ID); // Y joystick is inverted
-    double horizontalSpeed = -JOYSTICK.getRawAxis(RIGHT_JOYSTICK_X_ID); // X drive is inverted
+    double ySpeed = -JOYSTICK.getRawAxis(RIGHT_JOYSTICK_Y_ID); // Y joystick is inverted
+    double xSpeed = -JOYSTICK.getRawAxis(RIGHT_JOYSTICK_X_ID); // X drive is inverted
     double joystickAngle = Math.toDegrees(Math.atan2(-JOYSTICK.getRawAxis(LEFT_JOYSTICK_Y_ID), JOYSTICK.getRawAxis(LEFT_JOYSTICK_X_ID)));
     double angle = 0;
     //Detect if the left joystick is being used to determine whether to set PID goal
     if (Math.abs(JOYSTICK.getRawAxis(LEFT_JOYSTICK_X_ID)) > SENSITIVITY || Math.abs(JOYSTICK.getRawAxis(LEFT_JOYSTICK_Y_ID)) > SENSITIVITY) {
       m_subsystem.setGoal(joystickAngle);
-      angle = m_subsystem.calculate(GYRO.getAngle());
+      //angle = m_subsystem.calculate(GYRO.getAngle());
     }
-    m_subsystem.driveWithField(verticleSpeed, horizontalSpeed, angle ,m_gyro.getRotation2d());
+    m_subsystem.drive(xSpeed , ySpeed, 0);
+    //m_subsystem.driveWithField(xSpeed ySpeed, angle ,m_gyro.getRotation2d());
   }
 
   // Called once the command ends or is interrupted.
