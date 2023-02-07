@@ -24,17 +24,18 @@ public class Camera extends SubsystemBase {
   private final String aprilTagFieldAbsPath = "/home/lvuser/deploy/fields/2023_FieldLayout.json";
   private PhotonPoseEstimator robotPoseEstimator;
   private Transform3d robotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0));
-  private AprilTagFieldLayout aprilTagFieldLayout = null;
+  private AprilTagFieldLayout aprilTagFieldLayout = new AprilTagFieldLayout(null, 0, 0);
   public Camera() {
     try {
-      aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(aprilTagFieldAbsPath);
+      aprilTagFieldLayout = new AprilTagFieldLayout(aprilTagFieldAbsPath);
     }
     catch (IOException e) {
       try {
-        aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2022RapidReact.m_resourceFile);
+        aprilTagFieldLayout = new AprilTagFieldLayout(AprilTagFields.k2022RapidReact.m_resourceFile);
       } catch (IOException e1) {
-        // TODO Auto-generated catch block
+        // 
         e1.printStackTrace();
+        System.out.println(e1.getCause().toString());
       }
     };
     aprilTagFieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
