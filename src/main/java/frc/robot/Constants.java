@@ -22,7 +22,27 @@ import frc.robot.subsystems.Pneumatic;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public final static class Function{
+    public static double signof(double val)
+    {
+        if (val>0)
+        {
+          return 1;
+        }
+        if (val<0)
+        {
+          return -1;
+        }
+        return 0;
+    }
+    public static double signedSqr(double val)
+    {
+      return signof(val) * val * val;
+    }
+  }
+  
   public static final double SENSITIVITY = 0.05;
+  public static final double MAXINPUTMOTOR = 0.4;
   public final class MotorIDs {
     public static final int LEFT_FRONT_MOTOR = 1;
     public static final int LEFT_BACK_MOTOR = 2;

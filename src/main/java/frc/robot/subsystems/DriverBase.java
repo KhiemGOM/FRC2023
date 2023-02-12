@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 //import com.pathplanner.lib.PathConstraints;
 //import com.pathplanner.lib.PathPlanner;
@@ -20,6 +21,7 @@ import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -55,12 +57,20 @@ public class DriverBase extends SubsystemBase {
     rightFrontMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     rightBackMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
 
+    //Brake mode
+    leftFrontMotor.setNeutralMode(NeutralMode.Brake);
+    leftBackMotor.setNeutralMode(NeutralMode.Brake);
+    rightFrontMotor.setNeutralMode(NeutralMode.Brake);
+    rightBackMotor.setNeutralMode(NeutralMode.Brake);
+
     //Disable safety
     leftFrontMotor.setSafetyEnabled(false);
     rightFrontMotor.setSafetyEnabled(false);
     leftBackMotor.setSafetyEnabled(false);
     rightBackMotor.setSafetyEnabled(false);
 
+    rightFrontMotor.setInverted(true);
+    rightBackMotor.setInverted(true);
     mecanum = new MecanumDrive(leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor);
     mecanum.setSafetyEnabled(false);
 
@@ -84,11 +94,25 @@ public class DriverBase extends SubsystemBase {
   {
     return m_PIDController.calculate(currentAngle);
   }
-
+    /**
+   * Drive method for Mecanum platform.
+   *
+   * <p>Angles are measured counterclockwise from the positive X axis. The robot's speed is
+   * independent of its angle or rotation rate.
+   *
+   * @param xSpeed The robot's speed along the X axis [-1.0..1.0]. Forward is positive.
+   * @param ySpeed The robot's speed along the Y axis [-1.0..1.0]. Right is positive.
+   * @param zRotation The robot's rotation rate around the Z axis [-1.0..1.0]. Clockwise is
+   *     positive.
+   * @param gyroAngle The gyro heading around the Z axis. Use this to implement field-oriented
+   *     controls.
+   */
   public void drive (double x, double y, double rotation)
   {
-    System.out.println("Drive() Ran");
     mecanum.driveCartesian(x, y, rotation);
+    SmartDashboard.putNumber("Actual Vertical Speed", x);
+    SmartDashboard.putNumber("Actual Horizontal Speed", y);
+    SmartDashboard.putNumber("Angle", rotation);
   }
 
   public void drive (MecanumDriveWheelSpeeds vel)
@@ -152,6 +176,39 @@ public class DriverBase extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     odometry.update(GYRO.getRotation2d(), getWheelPositions());
+    // if (JOYSTICK.getRawButton(1))
+    //   leftFrontMotor.set(1);
+    // else
+    //   leftFrontMotor.set(0);
+    // if (JOYSTICK.getRawButton(2))
+    //   leftBackMotor.set(1);
+    // else
+    //   leftBackMotor.set(0);
+    // if (JOYSTICK.getRawButton(3))
+    //   rightFrontMotor.set(1);
+    // else
+    //   rightFrontMotor.set(0);
+    // if (JOYSTICK.getRawButton(4))
+    //   rightBackMotor.set(1);
+    // else
+    //   rightBackMotor.set(0);
+    // if (JOYSTICK.getRawButton(1)){
+    //   drive(1/Math.sqrt(2), 1/Math.sqrt(2), 0);
+    // }
+
+  // else if (JOYSTICK.getRawButton(2))
+  // {
+  //   drive(-1/Math.sqrt(2), -1/Math.sqrt(2), 0);
+  // }
+  // else
+  // {
+  //   drive(0,0,0);
+  // }
+    
+    SmartDashboard.putNumber("Motor Left Front", leftFrontMotor.get());
+    SmartDashboard.putNumber("Motor Left Back", leftBackMotor.get());
+    SmartDashboard.putNumber("Motor Right Front", rightFrontMotor.get());
+    SmartDashboard.putNumber("Motor Right Back", rightBackMotor.get());
   }
   
 }
