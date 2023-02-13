@@ -38,19 +38,12 @@ public class ManualControl extends CommandBase {
     System.out.println("Manual Control Ran");
     double ySpeed = -JOYSTICK.getRawAxis(RIGHT_JOYSTICK_Y_ID); // Y joystick is inverted
     double xSpeed = JOYSTICK.getRawAxis(RIGHT_JOYSTICK_X_ID); // X drive is inverted
-    //double rSpeed = JOYSTICK.getRawAxis(LEFT_JOYSTICK_X_ID);
-    double joystickAngle = Math.toDegrees(Math.atan2(-JOYSTICK.getRawAxis(LEFT_JOYSTICK_Y_ID), JOYSTICK.getRawAxis(LEFT_JOYSTICK_X_ID)));
-    double angle = 0;
+    double rSpeed = JOYSTICK.getRawAxis(LEFT_JOYSTICK_X_ID);
     SmartDashboard.putNumber("xSpeed", xSpeed * xSpeed);
     SmartDashboard.putNumber("ySpeed", ySpeed * ySpeed);
-    SmartDashboard.putNumber("Target Angle", joystickAngle);
     //Detect if the left joystick is being used to determine whether to set PID goal
-    if (Math.abs(JOYSTICK.getRawAxis(LEFT_JOYSTICK_X_ID)) > SENSITIVITY || Math.abs(JOYSTICK.getRawAxis(LEFT_JOYSTICK_Y_ID)) > SENSITIVITY) {
-      m_subsystem.setGoal(joystickAngle);
-      angle = m_subsystem.calculate(GYRO.getAngle());
-    }
     //m_subsystem.drive(xSpeed , ySpeed, 0);
-    m_subsystem.driveWithField(signedSqr(ySpeed) * MAXINPUTMOTOR,signedSqr(xSpeed)* MAXINPUTMOTOR, signedSqr(angle)*MAXINPUTMOTOR,GYRO.getRotation2d().unaryMinus()); //X and Y is swapped in Controller vs Robot axis
+    m_subsystem.driveWithField(signedSqr(ySpeed) * MAXINPUTMOTOR,signedSqr(xSpeed)* MAXINPUTMOTOR, signedSqr(rSpeed)*MAXINPUTMOTOR,GYRO.getRotation2d()); //X and Y is swapped in Controller vs Robot axis
   }
 
   // Called once the command ends or is interrupted.
