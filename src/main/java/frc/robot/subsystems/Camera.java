@@ -31,7 +31,7 @@ public class Camera extends SubsystemBase {
     }
     catch (IOException e) {
       try {
-        aprilTagFieldLayout = new AprilTagFieldLayout(AprilTagFields.k2022RapidReact.m_resourceFile);
+        aprilTagFieldLayout = new AprilTagFieldLayout(AprilTagFields.k2023ChargedUp.m_resourceFile);
       } catch (IOException e1) {
         // 
         e1.printStackTrace();
