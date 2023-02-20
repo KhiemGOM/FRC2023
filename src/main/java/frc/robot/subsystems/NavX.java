@@ -13,9 +13,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class NavX extends SubsystemBase {
   private AHRS gyro = new AHRS();
   public NavX() {}
+
+  /** Angle is not continuous from -180 to 180 degree */
   public double getAngle()
   {
     return gyro.getYaw();
+  }
+
+  public double getPitch()
+  {
+    return gyro.getPitch();
   }
 
   /** Angle is continuous */

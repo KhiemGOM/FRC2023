@@ -12,14 +12,12 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,7 +28,6 @@ import com.pathplanner.lib.commands.PPMecanumControllerCommand;
 import static frc.robot.Constants.MotorIDs.*;
 import static frc.robot.Constants.Measurements.*;
 import static frc.robot.Constants.SingleInstance.*;
-import static frc.robot.Constants.PID.*;
 
 public class DriverBase extends SubsystemBase {
   
@@ -49,7 +46,7 @@ public class DriverBase extends SubsystemBase {
   CENTRE_TO_RIGHT_BACK);
 
   private MecanumDriveOdometry odometry = new MecanumDriveOdometry(kinematics, GYRO.getRotation2d(), wheelPositions);
-  private ProfiledPIDController m_PIDController = new ProfiledPIDController(rP,rI,rD, new TrapezoidProfile.Constraints(rMaxSpeed, rMaxAccel));
+  //private ProfiledPIDController m_PIDController = new ProfiledPIDController(rP,rI,rD, new TrapezoidProfile.Constraints(rMaxSpeed, rMaxAccel));
 
   public DriverBase() {
     leftFrontMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
@@ -74,30 +71,29 @@ public class DriverBase extends SubsystemBase {
     mecanum = new MecanumDrive(leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor);
     mecanum.setSafetyEnabled(false);
 
-    m_PIDController.enableContinuousInput(-180, 180);
   }
 
+  /**
+   * Drive method for Mecanum platform.
+   *
+   * <p>Angles are measured clockwise from the positive X axis. The robot's speed is
+   * independent of its angle or rotation rate.
+   *
+   * @param xSpeed The robot's speed along the X axis [-1.0..1.0]. Forward is positive.
+   * @param ySpeed The robot's speed along the Y axis [-1.0..1.0]. Right is positive.
+   * @param zRotation The robot's rotation rate around the Z axis [-1.0..1.0]. Clockwise is
+   *     positive.
+   * @param gyroAngle The gyro heading around the Z axis. Use this to implement field-oriented
+   *     controls.
+   */
   public void driveWithField (double x, double y, double rotation, Rotation2d gyroAngle)
   {
     mecanum.driveCartesian(x, y, rotation, gyroAngle);
   }
-
-  public ProfiledPIDController getRotatePIDController ()
-  {
-    return m_PIDController;
-  }
-  public void setGoal(double goal)
-  {
-    m_PIDController.setGoal(goal);
-  }
-  public double calculate (double currentAngle)
-  {
-    return m_PIDController.calculate(currentAngle);
-  }
     /**
    * Drive method for Mecanum platform.
    *
-   * <p>Angles are measured counterclockwise from the positive X axis. The robot's speed is
+   * <p>Angles are measured clockwise from the positive X axis. The robot's speed is
    * independent of its angle or rotation rate.
    *
    * @param xSpeed The robot's speed along the X axis [-1.0..1.0]. Forward is positive.

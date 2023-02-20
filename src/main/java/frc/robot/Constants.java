@@ -68,11 +68,18 @@ public final class Constants {
   }
 
   public final static class PID{
+    //Rotation PID
     public static final double rP = 0.1;
     public static final double rI = 0.1;
     public static final double rD = 0.1;
     public static final double rMaxSpeed = 3;
     public static final double rMaxAccel = 2;
+
+    //Auto Balance PID
+    public static final double aP = 0.1;
+    public static final double aI = 0.1;
+    public static final double aD = 0.1;
+    public static final double aTolerance = 5;
   }
 
   public final static class GridPoses
