@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriverBase;
 
@@ -14,11 +15,12 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
 
 //import static frc.robot.Constants.GridPoses.*;
-
+//TODO: Refactor this redundant command into DriverBase
 public class DriveToTargetPose extends CommandBase {
   private PathPlannerTrajectory trajectory; 
   private DriverBase m_subsystem;
   private Pose2d targetPose;
+  private Command pathFollowCommand;
 
   public DriveToTargetPose(DriverBase __subsystem, Pose2d __targetPose) {
     m_subsystem = __subsystem;
@@ -33,9 +35,9 @@ public class DriveToTargetPose extends CommandBase {
       new PathConstraints(4, 3),
       new PathPoint(initPose.getTranslation(),initPose.getRotation()),
       new PathPoint(targetPose.getTranslation(),targetPose.getRotation()));
-      m_subsystem.getPathFollowCommand(trajectory, false).schedule();
+      pathFollowCommand = m_subsystem.getPathFollowCommand(trajectory, false);
   }
-
+  
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {

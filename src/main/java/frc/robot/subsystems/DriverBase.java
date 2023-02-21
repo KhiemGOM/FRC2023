@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -25,9 +26,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import com.pathplanner.lib.commands.PPMecanumControllerCommand;
-import static frc.robot.Constants.MotorIDs.*;
+import static frc.robot.Constants.HardwareIDs.*;
 import static frc.robot.Constants.Measurements.*;
 import static frc.robot.Constants.SingleInstance.*;
+import static frc.robot.Constants.Function.*;
 
 public class DriverBase extends SubsystemBase {
   
@@ -113,10 +115,12 @@ public class DriverBase extends SubsystemBase {
 
   public void drive (MecanumDriveWheelSpeeds vel)
   {
-    leftFrontMotor.set(vel.frontLeftMetersPerSecond);
-    leftBackMotor.set(vel.rearLeftMetersPerSecond);
-    rightFrontMotor.set(vel.frontRightMetersPerSecond);
-    rightBackMotor.set(vel.rearRightMetersPerSecond);
+    //TODO: Figure out how to use set() with ControlMode.Velocity properly
+    //!NOT FINISHED
+    leftFrontMotor.set(ControlMode.Velocity, encoderTicksToMeter(vel.frontLeftMetersPerSecond));
+    leftBackMotor.set(ControlMode.Velocity, encoderTicksToMeter(vel.rearLeftMetersPerSecond));
+    rightFrontMotor.set(ControlMode.Velocity, encoderTicksToMeter(vel.frontRightMetersPerSecond));
+    rightBackMotor.set(ControlMode.Velocity, encoderTicksToMeter(vel.rearRightMetersPerSecond));
   }
 
   public Command getPathFollowCommand (PathPlannerTrajectory _traj, boolean isFirstPath)
@@ -129,9 +133,10 @@ public class DriverBase extends SubsystemBase {
           }
         },DRIVER_BASE),
         new PPMecanumControllerCommand(
-            _traj, 
+            _traj,
             this::getPose, // Pose supplier
             this.kinematics, // MecanumDriveKinematics
+            //TODO: Add PID values
             new PIDController(0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
             new PIDController(0, 0, 0), // Y controller (usually the same values as X controller)
             new PIDController(0, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
@@ -162,10 +167,10 @@ public class DriverBase extends SubsystemBase {
 
   private MecanumDriveWheelPositions getWheelPositions() {
     return new MecanumDriveWheelPositions(
-      leftFrontMotor.getSelectedSensorPosition() * WHEEL_DIAMETER * Math.PI / 4096,
-      rightFrontMotor.getSelectedSensorPosition() * WHEEL_DIAMETER * Math.PI / 4096,
-      leftBackMotor.getSelectedSensorPosition() * WHEEL_DIAMETER * Math.PI / 4096, 
-      rightBackMotor.getSelectedSensorPosition() * WHEEL_DIAMETER * Math.PI / 4096
+      encoderTicksToMeter(leftFrontMotor.getSelectedSensorPosition()),
+      encoderTicksToMeter(rightFrontMotor.getSelectedSensorPosition()),
+      encoderTicksToMeter(leftBackMotor.getSelectedSensorPosition()),
+      encoderTicksToMeter(rightBackMotor.getSelectedSensorPosition())
     );
   }
   @Override

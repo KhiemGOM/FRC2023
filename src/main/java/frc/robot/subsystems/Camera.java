@@ -27,17 +27,21 @@ public class Camera extends SubsystemBase {
   private AprilTagFieldLayout aprilTagFieldLayout = new AprilTagFieldLayout(null, 0, 0);
   public Camera() {
     try {
-      aprilTagFieldLayout = new AprilTagFieldLayout(aprilTagFieldAbsPath);
+      
+      aprilTagFieldLayout = new AprilTagFieldLayout(AprilTagFields.k2023ChargedUp.m_resourceFile);
     }
-    catch (IOException e) {
-      try {
-        aprilTagFieldLayout = new AprilTagFieldLayout(AprilTagFields.k2023ChargedUp.m_resourceFile);
-      } catch (IOException e1) {
-        // 
+    catch (IOException e) 
+    {
+      try 
+      {
+        aprilTagFieldLayout = new AprilTagFieldLayout(aprilTagFieldAbsPath);
+      } 
+      catch (IOException e1) 
+      {
         e1.printStackTrace();
         System.out.println(e1.getCause().toString());
       }
-    };
+    }
     aprilTagFieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
     robotPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.AVERAGE_BEST_TARGETS, camera, robotToCam);
   }
