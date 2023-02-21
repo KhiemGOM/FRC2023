@@ -8,9 +8,10 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-//import com.pathplanner.lib.PathConstraints;
-//import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPoint;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import com.pathplanner.lib.commands.PPMecanumControllerCommand;
+
 import static frc.robot.Constants.HardwareIDs.*;
 import static frc.robot.Constants.Measurements.*;
 import static frc.robot.Constants.SingleInstance.*;
@@ -115,12 +117,12 @@ public class DriverBase extends SubsystemBase {
 
   public void drive (MecanumDriveWheelSpeeds vel)
   {
-    //TODO: Figure out how to use set() with ControlMode.Velocity properly
-    //!NOT FINISHED
-    leftFrontMotor.set(ControlMode.Velocity, encoderTicksToMeter(vel.frontLeftMetersPerSecond));
-    leftBackMotor.set(ControlMode.Velocity, encoderTicksToMeter(vel.rearLeftMetersPerSecond));
-    rightFrontMotor.set(ControlMode.Velocity, encoderTicksToMeter(vel.frontRightMetersPerSecond));
-    rightBackMotor.set(ControlMode.Velocity, encoderTicksToMeter(vel.rearRightMetersPerSecond));
+    //TODO: Test the conversion
+    //!Could be wrong
+    leftFrontMotor.set(ControlMode.Velocity, meterToEncoderTicks(vel.frontLeftMetersPerSecond) * 10);
+    leftBackMotor.set(ControlMode.Velocity, meterToEncoderTicks(vel.rearLeftMetersPerSecond) * 10);
+    rightFrontMotor.set(ControlMode.Velocity, meterToEncoderTicks(vel.frontRightMetersPerSecond) * 10);
+    rightBackMotor.set(ControlMode.Velocity, meterToEncoderTicks(vel.rearRightMetersPerSecond) * 10);
   }
 
   public Command getPathFollowCommand (PathPlannerTrajectory _traj, boolean isFirstPath)
@@ -147,10 +149,28 @@ public class DriverBase extends SubsystemBase {
         )
     );
   }
+
+  public Command getDriveToTargetPoseCommand(Pose2d _targetPose)
+  {
+    Pose2d initPose = getPose();
+    var trajectory =  PathPlanner.generatePath(
+      new PathConstraints(4, 3),
+      new PathPoint(initPose.getTranslation(),initPose.getRotation()),
+      new PathPoint(_targetPose.getTranslation(),_targetPose.getRotation()));
+    return getPathFollowCommand(trajectory, false);
+  }
+
   public Pose2d getPose()
   {
     return odometry.getPoseMeters();
   }
+
+  public Pose2d getPoseWithCV()
+  {
+    //TODO: Implement this after fix camera NullPointerException
+    return null;
+  }
+
   public void resetOdometry(Pose2d _initialPose)
   {
     resetEncoders();

@@ -11,8 +11,8 @@ import edu.wpi.first.wpilibj.Joystick;
 import frc.robot.subsystems.Arm;
 //import frc.robot.subsystems.Camera;
 import frc.robot.subsystems.DriverBase;
+import frc.robot.subsystems.Grabber;
 import frc.robot.subsystems.NavX;
-import frc.robot.subsystems.Pneumatic;
 import static frc.robot.Constants.Measurements.*;
 
 /**
@@ -29,7 +29,10 @@ public final class Constants {
     {
       return ticks * WHEEL_DIAMETER * Math.PI / WHEELS_TICKS_PER_REVOLUTION;
     }
-
+    public static double meterToEncoderTicks(double meter)
+    {
+      return meter * WHEELS_TICKS_PER_REVOLUTION / (WHEEL_DIAMETER * Math.PI);
+    }
     public static double signof(double val)
     {
         if (val>0)
@@ -49,7 +52,10 @@ public final class Constants {
   }
   
   public static final double SENSITIVITY = 0.05;
-  public static final double MAXINPUTMOTOR = 0.4;
+  public static final double MAXINPUTWHEELMOTOR = 0.4;
+  public static final double MAX_INPUT_ARM_ROTATE_MOTOR = 0.4;
+  public static final double MAX_INPUT_ARM_EXTEND_MOTOR = 0.4;
+  public static final double MAX_INPUT_GRABBER_MOTOR = 0.4;
   public final class HardwareIDs {
     //Motors
     public static final int LEFT_FRONT_MOTOR = 1;
@@ -58,6 +64,7 @@ public final class Constants {
     public static final int RIGHT_BACK_MOTOR = 4;
     public static final int ARM_ROTATE_MOTOR = 5;
     public static final int ARM_EXTEND_MOTOR = 6;
+    public static final int GRABBER_MOTOR = 7;
 
     //Encoders
     public static final int ARM_ABSOLUTE_ENCODER = 0;
@@ -68,8 +75,12 @@ public final class Constants {
     public static final int RIGHT_JOYSTICK_Y_ID = 5;
     public static final int LEFT_JOYSTICK_X_ID = 0;
     public static final int LEFT_JOYSTICK_Y_ID = 1;
-    public static final int PNEUMATIC_PUSH = 1;
-    public static final int PNEUMATIC_PULL = 2;
+    public static final int ARM_ROTATE_FOWARD_ID = 1;
+    public static final int ARM_ROTATE_BACKWARD_ID = 2;
+    public static final int ARM_EXTEND_ID = 3;
+    public static final int ARM_RETRACT_ID = 4;
+    public static final int GRABBER_GRAB_ID = 5;
+    public static final int GRABBER_RELEASE_ID = 6;
   }
   public final static class Measurements
   {
@@ -82,6 +93,7 @@ public final class Constants {
   }
 
   public final static class PID{
+    //TODO: Tune PID
     //Arm Rotation PID
     public static final double rP = 0.1;
     public static final double rI = 0.1;
@@ -110,9 +122,9 @@ public final class Constants {
   public final static class SingleInstance
   {
     public static NavX GYRO = new NavX();
-    public static Pneumatic PNEUMATIC = new Pneumatic();
     public static DriverBase DRIVER_BASE = new DriverBase();
     public static Arm ARM = new Arm();
+    public static Grabber GRABBER = new Grabber();
     //public static Camera CAMERA = new Camera();
 
     public static final Joystick JOYSTICK = new Joystick(0);

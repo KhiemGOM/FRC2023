@@ -5,9 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-// import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-// import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoBalance;
@@ -18,9 +16,10 @@ import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
-import static frc.robot.Constants.ButtonIDs.*;
 import static frc.robot.Constants.PID.*;
 import static frc.robot.Constants.PathFollow.*;
+import static frc.robot.Constants.*;
+import static frc.robot.Constants.ButtonIDs.*;
 
 
 /**
@@ -34,25 +33,70 @@ public class RobotContainer {
   //  DRIVER_BASE.resetOdometry(CAMERA.getEstimatedPose());
   //},DRIVER_BASE, CAMERA);
   private PathPlannerTrajectory trajec = PathPlanner.loadPath("Test Path", new PathConstraints(pMaxSpeed, pMaxAccel));
-  private InstantCommand m_pneumaticPush = new InstantCommand(() -> {
-    PNEUMATIC.push();
-  }, PNEUMATIC);
-  private InstantCommand m_pneumaticPull = new InstantCommand(() -> {
-    PNEUMATIC.pull();
-  }, PNEUMATIC);
   private Trigger isOnRamp = new Trigger(() -> {
     return GYRO.getPitch() > aTolerance;
   });
-  private JoystickButton m_pneumaticPushButton = new JoystickButton(JOYSTICK,PNEUMATIC_PUSH);
-  private JoystickButton m_pneumaticPullButton = new JoystickButton(JOYSTICK,PNEUMATIC_PULL);
+  private JoystickButton armRotateFowardButton= new JoystickButton(JOYSTICK,ARM_ROTATE_FOWARD_ID);
+  private JoystickButton armRotateBackwardButton= new JoystickButton(JOYSTICK,ARM_ROTATE_BACKWARD_ID);
+  private JoystickButton armExtendButton = new JoystickButton(JOYSTICK,ARM_EXTEND_ID);
+  private JoystickButton armRetractButton = new JoystickButton(JOYSTICK,ARM_RETRACT_ID);
+  private JoystickButton grabberGrabButton = new JoystickButton(JOYSTICK,GRABBER_GRAB_ID);
+  private JoystickButton grabberReleaseButton = new JoystickButton(JOYSTICK,GRABBER_RELEASE_ID);
+
   private AutoBalance m_autoBalance = new AutoBalance(DRIVER_BASE, GYRO);
   public RobotContainer() {
     configureBindings();
   }
   private void configureBindings() {
-    m_pneumaticPushButton.onTrue(m_pneumaticPush);
-    m_pneumaticPullButton.onTrue(m_pneumaticPull);
     isOnRamp.onTrue(m_autoBalance);
+
+    armRotateBackwardButton.onTrue(new StartEndCommand(() -> 
+    {
+      ARM.rotate(-MAX_INPUT_ARM_ROTATE_MOTOR);
+    },() -> 
+    {
+      ARM.rotate(0);
+    }, ARM));
+
+    armRotateFowardButton.onTrue(new StartEndCommand(() -> 
+    {
+      ARM.rotate(MAX_INPUT_ARM_ROTATE_MOTOR);
+    },() -> 
+    {
+      ARM.rotate(0);
+    }, ARM));
+
+    armExtendButton.onTrue(new StartEndCommand(() -> 
+    {
+      ARM.extend(MAX_INPUT_ARM_EXTEND_MOTOR);
+    },() -> 
+    {
+      ARM.extend(0);
+    }, ARM));
+    
+    armRetractButton.onTrue(new StartEndCommand(() -> 
+    {
+      ARM.extend(-MAX_INPUT_ARM_EXTEND_MOTOR);
+    },() -> 
+    {
+      ARM.extend(0);
+    }, ARM));
+
+    grabberGrabButton.onTrue(new StartEndCommand(() -> 
+    {
+      GRABBER.grab(MAX_INPUT_GRABBER_MOTOR);
+    },() -> 
+    {
+      GRABBER.grab(0);
+    }, GRABBER));
+
+    grabberReleaseButton.onTrue(new StartEndCommand(() -> 
+    {
+      GRABBER.grab(-MAX_INPUT_GRABBER_MOTOR);
+    },() -> 
+    {
+      GRABBER.grab(0);
+    }, GRABBER));
   }
 
   /**

@@ -26,6 +26,7 @@ public class Camera extends SubsystemBase {
   private Transform3d robotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0));
   private AprilTagFieldLayout aprilTagFieldLayout = new AprilTagFieldLayout(null, 0, 0);
   public Camera() {
+    //TODO: Fix NullPointerExption here
     try {
       
       aprilTagFieldLayout = new AprilTagFieldLayout(AprilTagFields.k2023ChargedUp.m_resourceFile);
