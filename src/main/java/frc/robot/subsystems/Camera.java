@@ -24,12 +24,11 @@ public class Camera extends SubsystemBase {
   private final String aprilTagFieldAbsPath = "/home/lvuser/deploy/fields/2023_FieldLayout.json";
   private PhotonPoseEstimator robotPoseEstimator;
   private Transform3d robotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0));
-  private AprilTagFieldLayout aprilTagFieldLayout = new AprilTagFieldLayout(null, 0, 0);
+  private AprilTagFieldLayout aprilTagFieldLayout;
   public Camera() {
-    //TODO: Fix NullPointerExption here
     try {
       
-      aprilTagFieldLayout = new AprilTagFieldLayout(AprilTagFields.k2023ChargedUp.m_resourceFile);
+      aprilTagFieldLayout = AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField();
     }
     catch (IOException e) 
     {
@@ -40,7 +39,7 @@ public class Camera extends SubsystemBase {
       catch (IOException e1) 
       {
         e1.printStackTrace();
-        System.out.println(e1.getCause().toString());
+        //System.out.println(e1.getCause().toString());
       }
     }
     aprilTagFieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);

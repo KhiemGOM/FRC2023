@@ -9,7 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import frc.robot.subsystems.Arm;
-//import frc.robot.subsystems.Camera;
+import frc.robot.subsystems.Camera;
 import frc.robot.subsystems.DriverBase;
 import frc.robot.subsystems.Grabber;
 import frc.robot.subsystems.NavX;
@@ -25,6 +25,11 @@ import static frc.robot.Constants.Measurements.*;
  */
 public final class Constants {
   public final static class Function{
+    /**Return whether the value is bigger than noise value (sensitivity) **/
+    public static boolean notNoise (double val)
+    {
+      return Math.abs(val) > SENSITIVITY;
+    }
     public static double encoderTicksToMeter(double ticks)
     {
       return ticks * WHEEL_DIAMETER * Math.PI / WHEELS_TICKS_PER_REVOLUTION;
@@ -104,9 +109,15 @@ public final class Constants {
 
     //Auto Balance PID
     public static final double aP = 0.1;
-    public static final double aI = 0.1;
-    public static final double aD = 0.1;
-    public static final double aTolerance = 5;
+    public static final double aI = 0;
+    public static final double aD = 0;
+    public static final double aTolerance = 0.5;
+
+    //Wheel PID
+    public static final double wP = 0.1;
+    public static final double wI = 0;
+    public static final double wD = 0;
+    public static final double wTolerance = 5;
   }
 
   public static final class PathFollow
@@ -125,7 +136,7 @@ public final class Constants {
     public static DriverBase DRIVER_BASE = new DriverBase();
     public static Arm ARM = new Arm();
     public static Grabber GRABBER = new Grabber();
-    //public static Camera CAMERA = new Camera();
+    public static Camera CAMERA = new Camera();
 
     public static final Joystick JOYSTICK = new Joystick(0);
   }

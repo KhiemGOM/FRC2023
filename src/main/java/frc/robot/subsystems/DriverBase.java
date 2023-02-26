@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
@@ -32,6 +31,7 @@ import static frc.robot.Constants.HardwareIDs.*;
 import static frc.robot.Constants.Measurements.*;
 import static frc.robot.Constants.SingleInstance.*;
 import static frc.robot.Constants.Function.*;
+import static frc.robot.Constants.PID.*;
 
 public class DriverBase extends SubsystemBase {
   
@@ -41,6 +41,11 @@ public class DriverBase extends SubsystemBase {
   private WPI_TalonSRX rightFrontMotor = new WPI_TalonSRX(RIGHT_FRONT_MOTOR);
   private WPI_TalonSRX rightBackMotor = new WPI_TalonSRX(RIGHT_BACK_MOTOR);
   private MecanumDrive mecanum ;
+  
+  private PIDController leftFrontController = new PIDController(wP, wI, wD);
+  private PIDController leftBackController = new PIDController(wI, wD, wP);
+  private PIDController rightFrontController = new PIDController(wI, wD, wP);
+  private PIDController rightBackController = new PIDController(wI, wD, wP);
   
   private MecanumDriveWheelPositions wheelPositions = new MecanumDriveWheelPositions();
   private MecanumDriveKinematics kinematics = new MecanumDriveKinematics(
@@ -75,6 +80,10 @@ public class DriverBase extends SubsystemBase {
     mecanum = new MecanumDrive(leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor);
     mecanum.setSafetyEnabled(false);
 
+    leftFrontController.setTolerance(wTolerance);
+    leftBackController.setTolerance(wTolerance);
+    rightFrontController.setTolerance(wTolerance);
+    rightBackController.setTolerance(wTolerance);
   }
 
   /**
@@ -92,37 +101,54 @@ public class DriverBase extends SubsystemBase {
    */
   public void driveWithField (double x, double y, double rotation, Rotation2d gyroAngle)
   {
-    mecanum.driveCartesian(x, y, rotation, gyroAngle);
-  }
-    /**
-   * Drive method for Mecanum platform.
-   *
-   * <p>Angles are measured clockwise from the positive X axis. The robot's speed is
-   * independent of its angle or rotation rate.
-   *
-   * @param xSpeed The robot's speed along the X axis [-1.0..1.0]. Forward is positive.
-   * @param ySpeed The robot's speed along the Y axis [-1.0..1.0]. Right is positive.
-   * @param zRotation The robot's rotation rate around the Z axis [-1.0..1.0]. Clockwise is
-   *     positive.
-   * @param gyroAngle The gyro heading around the Z axis. Use this to implement field-oriented
-   *     controls.
-   */
-  public void drive (double x, double y, double rotation)
-  {
-    mecanum.driveCartesian(x, y, rotation);
-    SmartDashboard.putNumber("Actual Vertical Speed", x);
-    SmartDashboard.putNumber("Actual Horizontal Speed", y);
-    SmartDashboard.putNumber("Angle", rotation);
+    if(notNoise(x) || notNoise(y) || notNoise(rotation))
+    {
+      System.out.println("x: " + x);
+      mecanum.driveCartesian(x, y, rotation, gyroAngle);
+    }
+
   }
 
   public void drive (MecanumDriveWheelSpeeds vel)
   {
     //TODO: Test the conversion
     //!Could be wrong
-    leftFrontMotor.set(ControlMode.Velocity, meterToEncoderTicks(vel.frontLeftMetersPerSecond) * 10);
-    leftBackMotor.set(ControlMode.Velocity, meterToEncoderTicks(vel.rearLeftMetersPerSecond) * 10);
-    rightFrontMotor.set(ControlMode.Velocity, meterToEncoderTicks(vel.frontRightMetersPerSecond) * 10);
-    rightBackMotor.set(ControlMode.Velocity, meterToEncoderTicks(vel.rearRightMetersPerSecond) * 10);
+    //Current formula: (m/s) * (t/c) / d / pi * 10
+    individualSet(0, meterToEncoderTicks(vel.frontLeftMetersPerSecond) * 10);
+    individualSet(1, meterToEncoderTicks(vel.rearLeftMetersPerSecond) * 10);
+    individualSet(2, meterToEncoderTicks(vel.frontRightMetersPerSecond) * 10);
+    individualSet(3, meterToEncoderTicks(vel.rearRightMetersPerSecond) * 10);
+  }
+  /**
+   * Drive method for Mecanum platform.
+   * <p>1 is left front
+   * <p>2 is left back
+   * <p>3 is right front
+   * <p>4 is right back
+   * @param motorNumber the motor number
+   * @param speed the speed of the motor
+   */
+  public void individualSet(int motorNumber, double speed)
+  {
+    MecanumDriveWheelSpeeds v = getEncoderVelocity();
+    if(notNoise(speed))
+    {
+      switch(motorNumber)
+      {
+        case 0:
+          leftFrontMotor.set(leftFrontController.calculate(v.frontLeftMetersPerSecond, speed));
+          break;
+        case 1:
+          leftBackMotor.set(leftBackController.calculate(v.rearLeftMetersPerSecond, speed));
+          break;
+        case 2:
+          rightFrontMotor.set(rightFrontController.calculate(v.frontRightMetersPerSecond, speed));
+          break;
+        case 3:
+          rightBackMotor.set(rightBackController.calculate(v.rearRightMetersPerSecond, speed));
+          break;
+      }
+    }
   }
 
   public Command getPathFollowCommand (PathPlannerTrajectory _traj, boolean isFirstPath)
@@ -167,8 +193,23 @@ public class DriverBase extends SubsystemBase {
 
   public Pose2d getPoseWithCV()
   {
-    //TODO: Implement this after fix camera NullPointerException
-    return null;
+    if(CAMERA.getEstimatedPose() != null)
+    {
+      return CAMERA.getEstimatedPose();
+    }
+    else
+    {
+      return getPose();
+    }
+  }
+  public MecanumDriveWheelSpeeds getEncoderVelocity()
+  {
+    return new MecanumDriveWheelSpeeds(
+      encoderTicksToMeter(leftFrontMotor.getSelectedSensorVelocity()),
+      encoderTicksToMeter(rightFrontMotor.getSelectedSensorVelocity()),
+      encoderTicksToMeter(leftBackMotor.getSelectedSensorVelocity()),
+      encoderTicksToMeter(rightBackMotor.getSelectedSensorVelocity())
+    );
   }
 
   public void resetOdometry(Pose2d _initialPose)
@@ -230,6 +271,8 @@ public class DriverBase extends SubsystemBase {
     SmartDashboard.putNumber("Motor Left Back", leftBackMotor.get());
     SmartDashboard.putNumber("Motor Right Front", rightFrontMotor.get());
     SmartDashboard.putNumber("Motor Right Back", rightBackMotor.get());
+
+    SmartDashboard.putNumber("Encoder Left Front", leftFrontMotor.getSelectedSensorVelocity());
   }
   
 }

@@ -4,7 +4,11 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.PIDCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -46,6 +50,7 @@ public class RobotContainer {
   private AutoBalance m_autoBalance = new AutoBalance(DRIVER_BASE, GYRO);
   public RobotContainer() {
     configureBindings();
+    SmartDashboard.putNumber("Speed Test", 500);
   }
   private void configureBindings() {
     isOnRamp.onTrue(m_autoBalance);
@@ -107,14 +112,18 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
 
     //Auto Balance code
-    // return new SequentialCommandGroup(
-    //   new StartEndCommand(() -> 
-    //     {
-    //       DRIVER_BASE.driveWithField(0.4, 0, 0, GYRO.getRotation2d());
-    //     }, 
-    //     null, DRIVER_BASE).withTimeout(2),
-    //   m_autoBalance
-    // );
-    return DRIVER_BASE.getPathFollowCommand(trajec, true);
+    //return m_autoBalance;
+    return new RunCommand(()->
+    {
+      DRIVER_BASE.driveWithField(0.4, 0, 0, GYRO.getRotation2d());
+    }, DRIVER_BASE).withTimeout(2);
+    //);
+    //return DRIVER_BASE.getPathFollowCommand(trajec, true);
+    // return new PIDCommand(
+    //   new PIDController(1, 0, 0), 
+    //   ()-> {return DRIVER_BASE.getEncoderVelocity().frontLeftMetersPerSecond;}, 
+    //   ()-> {return SmartDashboard.getNumber("Speed Test", 500);}, 
+    //   (double speed) -> {DRIVER_BASE.individualSet(1,speed);}, 
+    //   DRIVER_BASE);
   }
 }
