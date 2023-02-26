@@ -162,7 +162,7 @@ public class DriverBase extends SubsystemBase {
         },DRIVER_BASE),
         new PPMecanumControllerCommand(
             _traj,
-            this::getPose, // Pose supplier
+            this::getPoseWithCV, // Pose supplier
             this.kinematics, // MecanumDriveKinematics
             //TODO: Add PID values
             new PIDController(0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
@@ -193,9 +193,11 @@ public class DriverBase extends SubsystemBase {
 
   public Pose2d getPoseWithCV()
   {
-    if(CAMERA.getEstimatedPose() != null)
+    Pose2d estimatedPose = CAMERA.getEstimatedPose();
+    if(estimatedPose != null)
     {
-      return CAMERA.getEstimatedPose();
+      resetOdometry(estimatedPose);
+      return estimatedPose;
     }
     else
     {
@@ -214,6 +216,7 @@ public class DriverBase extends SubsystemBase {
 
   public void resetOdometry(Pose2d _initialPose)
   {
+    //TODO Research if the wheel posion can be set to 0
     resetEncoders();
     odometry.resetPosition(GYRO.getRotation2d(), getWheelPositions(), _initialPose);
   }
